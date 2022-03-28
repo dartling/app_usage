@@ -7,10 +7,12 @@ import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
+import kotlin.streams.toList
 
 /** AppUsagePlugin */
 class AppUsagePlugin : FlutterPlugin, MethodCallHandler {
     private lateinit var channel: MethodChannel
+    private var appUsageApi = AppUsageApi()
 
     override fun onAttachedToEngine(@NonNull flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
         channel = MethodChannel(flutterPluginBinding.binaryMessenger, "app_usage")
@@ -18,10 +20,11 @@ class AppUsagePlugin : FlutterPlugin, MethodCallHandler {
     }
 
     override fun onMethodCall(@NonNull call: MethodCall, @NonNull result: Result) {
-        if (call.method == "getPlatformVersion") {
-            result.success("Android ${android.os.Build.VERSION.RELEASE}")
-        } else {
-            result.notImplemented()
+        when (call.method) {
+            "getPlatformVersion" -> result.success("Android ${android.os.Build.VERSION.RELEASE}")
+            "getUsedApps" -> result.success(appUsageApi.usedApps.stream().map { it.toJson() }
+                .toList())
+            else -> result.notImplemented()
         }
     }
 

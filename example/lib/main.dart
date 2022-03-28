@@ -1,3 +1,4 @@
+import 'package:app_usage/models.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
 
@@ -17,6 +18,7 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   String _platformVersion = 'Unknown';
+  List<UsedApp> _usedApps = [];
 
   @override
   void initState() {
@@ -27,13 +29,16 @@ class _MyAppState extends State<MyApp> {
   // Platform messages are asynchronous, so we initialize in an async method.
   Future<void> initPlatformState() async {
     String platformVersion;
+    List<UsedApp> usedApps;
     // Platform messages may fail, so we use a try/catch PlatformException.
     // We also handle the message potentially returning null.
     try {
       platformVersion =
           await AppUsage.platformVersion ?? 'Unknown platform version';
+      usedApps = await AppUsage.apps;
     } on PlatformException {
       platformVersion = 'Failed to get platform version.';
+      usedApps = [];
     }
 
     // If the widget was removed from the tree while the asynchronous platform
@@ -43,6 +48,7 @@ class _MyAppState extends State<MyApp> {
 
     setState(() {
       _platformVersion = platformVersion;
+      _usedApps = usedApps;
     });
   }
 
@@ -53,8 +59,20 @@ class _MyAppState extends State<MyApp> {
         appBar: AppBar(
           title: const Text('Plugin example app'),
         ),
-        body: Center(
-          child: Text('Running on: $_platformVersion\n'),
+        body: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Text('Running on: $_platformVersion\n'),
+            ),
+            ..._usedApps.map(
+              (app) => ListTile(
+                title: Text(app.name),
+                subtitle: Text(app.id),
+                trailing: Text(app.timeUsed.toString()),
+              ),
+            )
+          ],
         ),
       ),
     );
