@@ -16,4 +16,12 @@ class AppUsage {
         await _channel.invokeListMethod<dynamic>('getUsedApps');
     return usedApps?.map(UsedApp.fromJson).toList() ?? [];
   }
+
+  static Future<String> setAppTimeLimit(String appId, Duration duration) async {
+    final String? result = await _channel.invokeMethod('setAppTimeLimit', {
+      'id': appId,
+      'durationInMinutes': duration.inMinutes,
+    });
+    return result ?? 'Could not set timer.';
+  }
 }

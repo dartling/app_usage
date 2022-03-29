@@ -12,4 +12,8 @@ class AppUsageApi {
         UsedApp("dev.hashnode.app", "Hashnode", 37),
         UsedApp("link.timelog.app", "Timelog", 25),
     )
+
+    fun setTimeLimit(id: String, durationInMinutes: Int): String {
+        return "Timer of $durationInMinutes minutes set for app ID $id";
+    }
 }

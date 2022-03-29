@@ -65,15 +65,45 @@ class _MyAppState extends State<MyApp> {
               padding: const EdgeInsets.all(8.0),
               child: Text('Running on: $_platformVersion\n'),
             ),
-            ..._usedApps.map(
-              (app) => ListTile(
-                title: Text(app.name),
-                subtitle: Text(app.id),
-                trailing: Text(app.timeUsed.toString()),
-              ),
-            )
+            ..._usedApps.map((app) => UsedAppTile(app: app))
           ],
         ),
+      ),
+    );
+  }
+}
+
+class UsedAppTile extends StatelessWidget {
+  const UsedAppTile({
+    Key? key,
+    required this.app,
+  }) : super(key: key);
+
+  final UsedApp app;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      title: Text(app.name),
+      subtitle: Text(app.timeUsed.toString()),
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          IconButton(
+            icon: const Icon(Icons.timer_outlined),
+            onPressed: () async {
+              // TODO: Set duration manually.
+              final String result = await AppUsage.setAppTimeLimit(
+                  app.id, const Duration(minutes: 30));
+              ScaffoldMessenger.of(context)
+                  .showSnackBar(SnackBar(content: Text(result)));
+            },
+          ),
+          IconButton(
+            icon: const Icon(Icons.app_blocking_outlined),
+            onPressed: () {},
+          ),
+        ],
       ),
     );
   }

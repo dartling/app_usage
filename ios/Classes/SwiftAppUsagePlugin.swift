@@ -21,6 +21,10 @@ class AppUsageApi {
         UsedApp(id: "dev.hashnode.app", name: "Hashnode", minutesUsed: 37),
         UsedApp(id: "link.timelog.app", name: "Timelog", minutesUsed: 25)
     ]
+
+    func setTimeLimit(id: String, durationInMinutes: Int) -> String {
+        return "Timer of \(durationInMinutes) minutes set for app ID \(id)"
+    }
 }
 
 public class SwiftAppUsagePlugin: NSObject, FlutterPlugin {
@@ -38,6 +42,11 @@ public class SwiftAppUsagePlugin: NSObject, FlutterPlugin {
             result("iOS " + UIDevice.current.systemVersion)
         case "getUsedApps":
             result(appUsageApi.usedApps.map { $0.toJson() })
+        case "setAppTimeLimit":
+            let arguments = call.arguments as! [String: Any]
+            let id = arguments["id"] as! String
+            let durationInMinutes = arguments["durationInMinutes"] as! Int
+            result(appUsageApi.setTimeLimit(id: id, durationInMinutes: durationInMinutes))
         default:
             result(FlutterMethodNotImplemented)
     }
