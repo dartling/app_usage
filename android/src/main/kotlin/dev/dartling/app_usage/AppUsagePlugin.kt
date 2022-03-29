@@ -24,12 +24,21 @@ class AppUsagePlugin : FlutterPlugin, MethodCallHandler {
             "getPlatformVersion" -> result.success("Android ${android.os.Build.VERSION.RELEASE}")
             "getUsedApps" -> result.success(appUsageApi.usedApps.stream().map { it.toJson() }
                 .toList())
-            "setAppTimeLimit" -> result.success(
-                appUsageApi.setTimeLimit(
-                    call.argument<String>("id")!!,
-                    call.argument<Int>("durationInMinutes")!!
+            "setAppTimeLimit" -> {
+                if (!call.hasArgument("id") || !call.hasArgument("durationInMinutes")) {
+                    result.error(
+                        "BAD_REQUEST",
+                        "Missing 'id' or 'durationInMinutes' argument",
+                        Exception("Something went wrong")
+                    )
+                }
+                result.success(
+                    appUsageApi.setTimeLimit(
+                        call.argument<String>("id")!!,
+                        call.argument<Int>("durationInMinutes")!!
+                    )
                 )
-            )
+            }
             else -> result.notImplemented()
         }
     }

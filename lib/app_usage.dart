@@ -18,10 +18,14 @@ class AppUsage {
   }
 
   static Future<String> setAppTimeLimit(String appId, Duration duration) async {
-    final String? result = await _channel.invokeMethod('setAppTimeLimit', {
-      'id': appId,
-      'durationInMinutes': duration.inMinutes,
-    });
-    return result ?? 'Could not set timer.';
+    try {
+      final String? result = await _channel.invokeMethod('setAppTimeLimit', {
+        'id': appId,
+        'durationInMinutes': duration.inMinutes,
+      });
+      return result ?? 'Could not set timer.';
+    } on PlatformException catch (ex) {
+      return ex.message ?? 'Unexpected error';
+    }
   }
 }
