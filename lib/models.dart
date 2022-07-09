@@ -12,4 +12,16 @@ class UsedApp {
       Duration(minutes: json['minutesUsed'] as int),
     );
   }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is UsedApp &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          name == other.name &&
+          timeUsed == other.timeUsed;
+
+  @override
+  int get hashCode => id.hashCode ^ name.hashCode ^ timeUsed.hashCode;
 }
