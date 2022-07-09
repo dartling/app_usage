@@ -20,6 +20,8 @@ class _MyAppState extends State<MyApp> {
   String _platformVersion = 'Unknown';
   List<UsedApp> _usedApps = [];
 
+  final _appUsagePlugin = AppUsage();
+
   @override
   void initState() {
     super.initState();
@@ -33,9 +35,9 @@ class _MyAppState extends State<MyApp> {
     // Platform messages may fail, so we use a try/catch PlatformException.
     // We also handle the message potentially returning null.
     try {
-      platformVersion =
-          await AppUsage.platformVersion ?? 'Unknown platform version';
-      usedApps = await AppUsage.apps;
+      platformVersion = await _appUsagePlugin.getPlatformVersion() ??
+          'Unknown platform version';
+      usedApps = await _appUsagePlugin.apps;
     } on PlatformException {
       platformVersion = 'Failed to get platform version.';
       usedApps = [];
@@ -65,11 +67,30 @@ class _MyAppState extends State<MyApp> {
               padding: const EdgeInsets.all(8.0),
               child: Text('Running on: $_platformVersion\n'),
             ),
-            ..._usedApps.map((app) => UsedAppTile(app: app))
+            ..._usedApps.map(_toAppTile)
           ],
         ),
       ),
     );
+  }
+
+  Widget _toAppTile(UsedApp app) {
+    return Builder(builder: (context) {
+      return UsedAppTile(
+        app: app,
+        onSetTimer: () async {
+          // TODO: Set duration manually.
+          final scaffoldMessenger = ScaffoldMessenger.of(context);
+          final String result = await _appUsagePlugin.setAppTimeLimit(
+              app.id, const Duration(minutes: 30));
+          scaffoldMessenger.showSnackBar(SnackBar(content: Text(result)));
+        },
+        onBlock: () {
+          ScaffoldMessenger.of(context)
+              .showSnackBar(const SnackBar(content: Text('Not supported.')));
+        },
+      );
+    });
   }
 }
 
@@ -77,9 +98,13 @@ class UsedAppTile extends StatelessWidget {
   const UsedAppTile({
     Key? key,
     required this.app,
+    required this.onSetTimer,
+    required this.onBlock,
   }) : super(key: key);
 
   final UsedApp app;
+  final VoidCallback onSetTimer;
+  final VoidCallback onBlock;
 
   @override
   Widget build(BuildContext context) {
@@ -91,17 +116,11 @@ class UsedAppTile extends StatelessWidget {
         children: [
           IconButton(
             icon: const Icon(Icons.timer_outlined),
-            onPressed: () async {
-              // TODO: Set duration manually.
-              final String result = await AppUsage.setAppTimeLimit(
-                  app.id, const Duration(minutes: 30));
-              ScaffoldMessenger.of(context)
-                  .showSnackBar(SnackBar(content: Text(result)));
-            },
+            onPressed: onSetTimer,
           ),
           IconButton(
             icon: const Icon(Icons.app_blocking_outlined),
-            onPressed: () {},
+            onPressed: onBlock,
           ),
         ],
       ),
